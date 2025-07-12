@@ -1,6 +1,4 @@
-import { 
-  collection, addDoc, getDocs, deleteDoc, doc, updateDoc, Timestamp 
-} from "firebase/firestore";
+import { collection, addDoc, doc, updateDoc, getDocs, Timestamp } from "firebase/firestore";
 import { useState, useEffect } from "react";
 import { db } from "./firebase";
 import ProductForm from "./components/ProductForm";
@@ -32,7 +30,7 @@ export default function Admin() {
     }
   }
 
-  // Função para confirmar perda de produto e salvar no Firestore
+  // Função para confirmar perda
   async function confirmarPerda(produto, quantidadePerdida) {
     try {
       if (!quantidadePerdida || quantidadePerdida <= 0) {
@@ -53,15 +51,14 @@ export default function Admin() {
         dataConfirmacao: Timestamp.now(),
       });
 
-      // Atualiza a quantidade do produto na coleção 'produtos'
+      // Atualiza a quantidade no produto
       const produtoRef = doc(db, "produtos", produto.id);
-      const novaQuantidade = (produto.quantidade || 0) - quantidadePerdida;
+      const novaQuantidade = produto.quantidade - quantidadePerdida;
       await updateDoc(produtoRef, {
         quantidade: novaQuantidade >= 0 ? novaQuantidade : 0,
       });
 
-      // Atualiza a lista local de produtos
-      fetchProducts();
+      await fetchProducts();
 
       alert("Perda confirmada com sucesso!");
     } catch (error) {
@@ -87,11 +84,10 @@ export default function Admin() {
         </section>
 
         <section className="bg-white p-6 rounded-xl shadow">
-          {/* Passa a função confirmarPerda para o componente Home */}
-          <Home 
-            products={products} 
-            onDelete={handleDelete} 
-            onConfirmarPerda={confirmarPerda} 
+          <Home
+            products={products}
+            onDelete={handleDelete}
+            onConfirmarPerda={confirmarPerda} // <-- Passa aqui!
           />
         </section>
       </main>
